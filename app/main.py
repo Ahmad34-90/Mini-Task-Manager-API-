@@ -40,3 +40,15 @@ def get_tasks(task_id:int):
     return{
         "message":"task not found"
     }
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id:int):
+    for task in tasks:
+        if task["id"] == task_id:
+            tasks.remove(task)
+        return{
+            "message":"Task deleted successfully"
+        }
+    return{
+        "message":"Task not found"
+    }
