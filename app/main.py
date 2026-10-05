@@ -47,6 +47,7 @@ def get_tasks(task_id:int, db:Session = Depends(get_db)):
         return {
             "message":"Task not found"
         }
+    return task 
 
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id:int, db:Session= Depends(get_db)):
@@ -73,7 +74,7 @@ def update_task(task_id:int, task_update:updateTask, db:Session = Depends(get_db
     
     task.title = task_update.title
     task.description = task_update.description
-    task.prioprity = task_update.priority
+    task.priority = task_update.priority
 
     db.commit()
     db.refresh(task)
