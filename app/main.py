@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from app.model import Task
 from app.database import Base, engine, get_db
 from app.schemas import createTask, updateTask
@@ -44,18 +44,21 @@ def create_task(task: createTask, db:Session = Depends(get_db)):
 def get_tasks(task_id:int, db:Session = Depends(get_db)):
     task= db.query(Task).filter(Task.id == task_id).first()
     if task is None:
-        return {
-            "message":"Task not found"
-        }
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
     return task 
 
 @app.delete("/tasks/{task_id}")
 def delete_task(task_id:int, db:Session= Depends(get_db)):
     task = db.query(Task).filter(Task.id == task_id).first()
     if task is None:
-        return{
-            "message":"Task Not Found"
-        }
+        raise HTTPException(
+                status_code=404,
+                detail="Task not found"
+            )
+    
     db.delete(task)
     db.commit()
 
@@ -68,9 +71,10 @@ def update_task(task_id:int, task_update:updateTask, db:Session = Depends(get_db
     task = db.query(Task).filter(Task.id == task_id).first()
 
     if task is None:
-        return{
-            "message":"No task found"
-        }
+        raise HTTPException(
+                status_code=404,
+                detail="Task not found"
+            )
     
     task.title = task_update.title
     task.description = task_update.description
