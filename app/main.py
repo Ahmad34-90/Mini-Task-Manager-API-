@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from app.model import Task
-from app.database import Base, engine
+from app.database import Base, engine, get_db
 from app.schemas import createTask, updateTask
+from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
 
@@ -11,26 +12,28 @@ app = FastAPI(
     version="1.0.0"
 )
 
-tasks= []
 
-@app.get("/")
-def root():
+
+@app.get("/tasks")
+def get_tasks(db: Session = Depends(get_db)):
+    tasks = db.query(Task).all()
+
     return {
-        "message": "Mini Task Manager API is running."
+        "tasks": tasks
     }
 
 @app.post("/tasks")
-def create_task(task: createTask):
-    task_id = len(task)+1
+def create_task(task: createTask, db:Session = Depends(get_db)):
 
-    new_task={
-        "id":task_id,
-        "title":task.title,
-        "dscription":task.description,
-        "priority":task.priority
-    }
+    new_task= Task(
+       title= task.title,
+       description = task.description,
+       priority= task.priority
+    )
 
-    tasks.append(new_task)
+    db.add(new_task)
+    db.commit()
+    db.refresh(new_task)
 
     return {
         "message":"Task create successfully",
@@ -38,37 +41,44 @@ def create_task(task: createTask):
     }
 
 @app.get("/tasks/{task_id}")
-def get_tasks(task_id:int):
-    for task in tasks:
-        if task["id"] == task_id:
-            return task
-    return{
-        "message":"task not found"
-    }
+def get_tasks(task_id:int, db:Session = Depends(get_db)):
+    task= db.query(Task).filter(Task.id == task_id).first()
+    if task is None:
+        return {
+            "message":"Task not found"
+        }
 
 @app.delete("/tasks/{task_id}")
-def delete_task(task_id:int):
-    for task in tasks:
-        if task["id"] == task_id:
-            tasks.remove(task)
+def delete_task(task_id:int, db:Session= Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+    if task is None:
         return{
-            "message":"Task deleted successfully"
+            "message":"Task Not Found"
         }
-    return{
-        "message":"Task not found"
+    db.delete(task)
+    db.commit()
+
+    return {
+        "message":"Task deleted Completely"
     }
 
 @app.put("/tasks/{task_id}")
-def update_task(task_id:int, task_update:updateTask):
-    for task in tasks:
-        if task["id"] == task_id:
-            task["title"] = task_update.title
-            task["description"] = task_update.description
-            task["priority"] = task_update.priority
+def update_task(task_id:int, task_update:updateTask, db:Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+
+    if task is None:
         return{
-            "message":"Task update Successfully",
-            "task":task
+            "message":"No task found"
         }
+    
+    task.title = task_update.title
+    task.description = task_update.description
+    task.prioprity = task_update.priority
+
+    db.commit()
+    db.refresh(task)
+
     return{
-        "message":"task not found"
+        "message":"Task Updated Succesfully",
+        "task":task
     }
