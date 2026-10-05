@@ -16,14 +16,27 @@ def root():
 
 @app.post("/tasks")
 def create_task(task: createTask):
-    tasks.append(task)
-    return {
-        "message":"Task create successfully",
-        "task":task
+    task_id = len(task)+1
+
+    new_task={
+        "id":task_id,
+        "title":task.title,
+        "dscription":task.description,
+        "priority":task.priority
     }
 
-@app.get("/tasks")
-def get_tasks():
+    tasks.append(new_task)
+
+    return {
+        "message":"Task create successfully",
+        "task":new_task
+    }
+
+@app.get("/tasks/{task_id}")
+def get_tasks(task_id:int):
+    for task in tasks:
+        if task["id"] == task_id:
+            return task
     return{
-        "tasks":tasks
+        "message":"task not found"
     }
