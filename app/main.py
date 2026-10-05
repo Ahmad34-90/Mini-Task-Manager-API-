@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.schemas import createTask
+from app.schemas import createTask, updateTask
 app = FastAPI(
     title="Mini Task Manager API",
     description="A simple REST API for managing tasks.",
@@ -51,4 +51,19 @@ def delete_task(task_id:int):
         }
     return{
         "message":"Task not found"
+    }
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id:int, task_update:updateTask):
+    for task in tasks:
+        if task["id"] == task_id:
+            task["title"] = task_update.title
+            task["description"] = task_update.description
+            task["priority"] = task_update.priority
+        return{
+            "message":"Task update Successfully",
+            "task":task
+        }
+    return{
+        "message":"task not found"
     }
