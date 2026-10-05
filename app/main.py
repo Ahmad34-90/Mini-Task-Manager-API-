@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from app.model import Task
 from app.database import Base, engine, get_db
-from app.schemas import createTask, updateTask
+from app.schemas import createTask, updateTask, TaskResponse
 from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
@@ -40,7 +40,7 @@ def create_task(task: createTask, db:Session = Depends(get_db)):
         "task":new_task
     }
 
-@app.get("/tasks/{task_id}")
+@app.get("/tasks/{task_id}", response_model=TaskResponse)
 def get_tasks(task_id:int, db:Session = Depends(get_db)):
     task= db.query(Task).filter(Task.id == task_id).first()
     if task is None:
