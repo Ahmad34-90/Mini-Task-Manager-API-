@@ -1,5 +1,10 @@
 from fastapi import FastAPI
+from app.model import Task
+from app.database import Base, engine
 from app.schemas import createTask, updateTask
+
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(
     title="Mini Task Manager API",
     description="A simple REST API for managing tasks.",
