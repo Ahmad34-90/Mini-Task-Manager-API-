@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
 
 DATABASE_URL = "sqlite:///./tasks.db"
 
@@ -16,3 +16,11 @@ SessionLocal = sessionmaker(
 
 class Base(DeclarativeBase):
     pass
+
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
