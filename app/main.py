@@ -6,6 +6,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
+tasks= []
 
 @app.get("/")
 def root():
@@ -15,7 +16,14 @@ def root():
 
 @app.post("/tasks")
 def create_task(task: createTask):
+    tasks.append(task)
     return {
         "message":"Task create successfully",
         "task":task
+    }
+
+@app.get("/tasks")
+def get_tasks():
+    return{
+        "tasks":tasks
     }
