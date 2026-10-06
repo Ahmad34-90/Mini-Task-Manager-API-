@@ -14,15 +14,13 @@ app = FastAPI(
 
 
 
-@app.get("/tasks")
-def get_tasks(db: Session = Depends(get_db)):
+@app.get("/tasks", response_model=list[TaskResponse])
+def get_task(db: Session = Depends(get_db)):
     tasks = db.query(Task).all()
 
-    return {
-        "tasks": tasks
-    }
+    return tasks
 
-@app.post("/tasks")
+@app.post("/tasks", response_model=list[TaskResponse])
 def create_task(task: createTask, db:Session = Depends(get_db)):
 
     new_task= Task(
@@ -35,13 +33,10 @@ def create_task(task: createTask, db:Session = Depends(get_db)):
     db.commit()
     db.refresh(new_task)
 
-    return {
-        "message":"Task create successfully",
-        "task":new_task
-    }
+    return new_task
 
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
-def get_tasks(task_id:int, db:Session = Depends(get_db)):
+def get_task(task_id:int, db:Session = Depends(get_db)):
     task= db.query(Task).filter(Task.id == task_id).first()
     if task is None:
         raise HTTPException(
@@ -66,7 +61,7 @@ def delete_task(task_id:int, db:Session= Depends(get_db)):
         "message":"Task deleted Completely"
     }
 
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}", response_model=TaskResponse)
 def update_task(task_id:int, task_update:updateTask, db:Session = Depends(get_db)):
     task = db.query(Task).filter(Task.id == task_id).first()
 
@@ -83,7 +78,4 @@ def update_task(task_id:int, task_update:updateTask, db:Session = Depends(get_db
     db.commit()
     db.refresh(task)
 
-    return{
-        "message":"Task Updated Succesfully",
-        "task":task
-    }
+    return task
