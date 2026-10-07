@@ -40,3 +40,9 @@ Mini task manager API/
 ├── requirements.txt
 ├── README.md
 └── test.http
+
+## Swagger UI Link 
+https://mini-task-manager-api-4z8r.onrender.com/docs
+
+## Task Link 
+https://mini-task-manager-api-4z8r.onrender.com/tasks/
